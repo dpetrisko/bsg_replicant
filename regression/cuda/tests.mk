@@ -43,6 +43,7 @@ UNIFIED_TESTS += test_barrier
 UNIFIED_TESTS += test_striped
 
 # "Independent Tests" use a per-test <test_name>.c file
+INDEPENDENT_TESTS += test_barrier_template
 INDEPENDENT_TESTS += test_binary_load_buffer
 INDEPENDENT_TESTS += test_empty_parallel
 INDEPENDENT_TESTS += test_multiple_binary_load
