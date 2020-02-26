@@ -92,8 +92,8 @@ int kernel_matrix_mul_shared_mem (int argc, char **argv) {
         /*****************************************************************************************************************
         * Allocate memory on the device for A, B and C.
         ******************************************************************************************************************/
-        uint32_t M = 32;   
-        uint32_t N = 64; 
+        uint32_t M = 16;   
+        uint32_t N = 16; 
         uint32_t P = 16; 
 
         eva_t A_device, B_device, C_device; 
@@ -176,7 +176,7 @@ int kernel_matrix_mul_shared_mem (int argc, char **argv) {
         /*****************************************************************************************************************
         * Enquque grid of tile groups, pass in grid and tile group dimensions, kernel name, number and list of input arguments
         ******************************************************************************************************************/
-        rc = hb_mc_kernel_enqueue (&device, grid_dim, tg_dim, "kernel_matrix_mul_shared_mem", 8, cuda_argv);
+        rc = hb_mc_kernel_enqueue_template (&device, grid_dim, tg_dim, "kernel_matrix_mul_shared_mem", 8, cuda_argv);
         if (rc != HB_MC_SUCCESS) { 
                 bsg_pr_err("failed to initialize grid.\n");
                 return rc;
