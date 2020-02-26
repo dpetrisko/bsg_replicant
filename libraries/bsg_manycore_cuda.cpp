@@ -326,6 +326,42 @@ int hb_mc_kernel_enqueue (hb_mc_device_t *device,
 
 
 
+/**
+ * Enqueues and schedules a kernel to be run on device
+ * Appends the tile group dimensions to the kernel name 
+ * Otherwise, identical to hb_mc_kernel_enqueue
+ * Takes the grid size, tile group dimensions, kernel name, argc, argv* and the
+ * finish signal address, calls hb_mc_tile_group_enqueue to initialize all tile groups for grid.
+ * @param[in]  device        Pointer to device
+ * @param[in]  grid_dim      X/Y dimensions of the grid to be initialized
+ * @param[in]  tg_dim        X/Y dimensions of tile groups in grid
+ * @param[in]  name          Kernel name to be executed on tile groups in grid
+ * @param[in]  argc          Number of input arguments to kernel
+ * @param[in]  argv          List of input arguments to kernel
+ * @return HB_MC_SUCCESS if succesful. Otherwise an error code is returned.
+ */
+int hb_mc_kernel_enqueue_template (hb_mc_device_t *device,
+                                   hb_mc_dimension_t grid_dim,
+                                   hb_mc_dimension_t tg_dim,
+                                   const char* name,
+                                   uint32_t argc,
+                                   const uint32_t *argv) {
+
+        // Initialize a string with the kernel name 
+        std::string template_name (name);
+
+        // Append tile group dimensions to kernel name 
+        template_name.append("_");
+        template_name.append(std::to_string(tg_dim.x));
+        template_name.append("_");
+        template_name.append(std::to_string(tg_dim.y));
+
+        return hb_mc_kernel_enqueue (device, grid_dim, tg_dim, template_name.c_str(), argc, argv);
+}
+
+
+
+
 
 /**
  * Initializes the tile group structure of a device 
