@@ -65,6 +65,8 @@ INDEPENDENT_TESTS += test_shared_mem
 INDEPENDENT_TESTS += test_shared_mem_load_store
 INDEPENDENT_TESTS += test_matrix_mul
 INDEPENDENT_TESTS += test_matrix_mul_shared_mem
+INDEPENDENT_TESTS += test_matrix_mul_dma
+INDEPENDENT_TESTS += test_matrix_mul_shared_mem_dma
 
 INDEPENDENT_TESTS += test_float_all_ops
 INDEPENDENT_TESTS += test_float_vec_add
