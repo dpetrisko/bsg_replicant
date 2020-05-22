@@ -27,7 +27,7 @@
 
 LIB_CSOURCES   += 
 LIB_CXXSOURCES += $(LIBRARIES_PATH)/bsg_manycore.cpp
-LIB_CXXSOURCES += $(LIBRARIES_PATH)/bsg_manycore_platform.cpp
+LIB_CXXSOURCES += $(LIBRARIES_PATH)/platforms/vcs/bsg_manycore_platform.cpp
 LIB_CXXSOURCES += $(LIBRARIES_PATH)/bsg_manycore_bits.cpp
 LIB_CXXSOURCES += $(LIBRARIES_PATH)/bsg_manycore_config.cpp
 LIB_CXXSOURCES += $(LIBRARIES_PATH)/bsg_manycore_cuda.cpp
@@ -60,7 +60,6 @@ LIB_HEADERS += $(LIBRARIES_PATH)/bsg_manycore_responder.h
 LIB_HEADERS += $(LIBRARIES_PATH)/bsg_manycore_tile.h
 
 LIB_HEADERS += $(LIBRARIES_PATH)/bsg_manycore_vcache.h
-LIB_HEADERS += $(LIBRARIES_PATH)/bsg_manycore_mmio.h
 LIB_HEADERS += $(LIBRARIES_PATH)/bsg_manycore_errno.h
 LIB_HEADERS += $(LIBRARIES_PATH)/bsg_manycore_features.h
 LIB_HEADERS += $(LIBRARIES_PATH)/bsg_manycore_coordinate.h
@@ -77,6 +76,7 @@ LIB_OBJECTS += $(patsubst %cpp,%o,$(LIB_CXXSOURCES))
 LIB_OBJECTS += $(patsubst %c,%o,$(LIB_CSOURCES))
 
 $(LIB_OBJECTS): INCLUDES  = -I$(LIBRARIES_PATH)
+$(LIB_OBJECTS): INCLUDES += -I$(LIBRARIES_PATH)/features/mmio
 $(LIB_OBJECTS): INCLUDES += -I$(SDK_DIR)/userspace/include
 $(LIB_OBJECTS): INCLUDES += -I$(HDK_DIR)/common/software/include
 $(LIB_OBJECTS): INCLUDES += -I$(AWS_FPGA_REPO_DIR)/SDAccel/userspace/include
