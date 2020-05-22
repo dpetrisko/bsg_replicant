@@ -302,14 +302,20 @@ extern "C" {
          * @param[in]  mc     A manycore instance initialized with hb_mc_manycore_init()
          * @return One if DMA writing is supported - Zero otherwise.
          */
-        int hb_mc_manycore_supports_dma_write(const hb_mc_manycore_t *mc);
+        static inline int hb_mc_manycore_supports_dma_write(const hb_mc_manycore_t *mc)
+        {
+                return hb_mc_config_memsys_feature_dma(hb_mc_manycore_get_config(mc)) == 1;
+        }
 
         /**
          * Check if DMA reading is supported.
          * @param[in]  mc     A manycore instance initialized with hb_mc_manycore_init()
          * @return One if DMA reading is supported - Zero otherwise.
          */
-        int hb_mc_manycore_supports_dma_read(const hb_mc_manycore_t *mc);
+        static inline int hb_mc_manycore_supports_dma_read(const hb_mc_manycore_t *mc)
+        {
+                return hb_mc_config_memsys_feature_dma(hb_mc_manycore_get_config(mc)) == 1;
+        }
 
         /**
          * Write memory via DMA to manycore DRAM starting at a given NPA
@@ -478,15 +484,6 @@ extern "C" {
          * @return One if DRAM is enabled. Zero otherwise.
          */
         int hb_mc_manycore_disable_dram(hb_mc_manycore_t *mc);
-
-
-        /**
-         * Check if NPA is in DRAM.
-         * @param[in]  mc     A manycore instance initialized with hb_mc_manycore_init()
-         * @param[in]  npa    A valid hb_mc_npa_t
-         * @return One if the NPA maps to DRAM - Zero otherwise.
-         */
-        int hb_mc_manycore_npa_is_dram(hb_mc_manycore_t *mc, const hb_mc_npa_t *npa);
 
         /**
          * Get the max size of program text.

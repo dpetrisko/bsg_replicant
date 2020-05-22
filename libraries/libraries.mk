@@ -28,6 +28,7 @@
 LIB_CSOURCES   += 
 LIB_CXXSOURCES += $(LIBRARIES_PATH)/bsg_manycore.cpp
 LIB_CXXSOURCES += $(LIBRARIES_PATH)/platforms/vcs/bsg_manycore_platform.cpp
+LIB_CXXSOURCES += $(LIBRARIES_PATH)/features/dma/cosim/bsg_manycore_dma.cpp
 LIB_CXXSOURCES += $(LIBRARIES_PATH)/bsg_manycore_bits.cpp
 LIB_CXXSOURCES += $(LIBRARIES_PATH)/bsg_manycore_config.cpp
 LIB_CXXSOURCES += $(LIBRARIES_PATH)/bsg_manycore_cuda.cpp
@@ -77,6 +78,7 @@ LIB_OBJECTS += $(patsubst %c,%o,$(LIB_CSOURCES))
 
 $(LIB_OBJECTS): INCLUDES  = -I$(LIBRARIES_PATH)
 $(LIB_OBJECTS): INCLUDES += -I$(LIBRARIES_PATH)/features/mmio
+$(LIB_OBJECTS): INCLUDES += -I$(LIBRARIES_PATH)/features/dma
 $(LIB_OBJECTS): INCLUDES += -I$(SDK_DIR)/userspace/include
 $(LIB_OBJECTS): INCLUDES += -I$(HDK_DIR)/common/software/include
 $(LIB_OBJECTS): INCLUDES += -I$(AWS_FPGA_REPO_DIR)/SDAccel/userspace/include
