@@ -5,10 +5,6 @@
 
 #include <cstring>
 
-#include <svdpi.h>
-#include <fpga_pci_sv.h>
-#include <utils/sh_dpi_tasks.h>
-
 /* these are convenience macros that are only good for one line prints */
 #define platform_pr_dbg(m, fmt, ...)                    \
         bsg_pr_dbg("%s: " fmt, m->name, ##__VA_ARGS__)
@@ -28,167 +24,11 @@
 typedef struct hb_mc_platform_t {
         const char *name;
         int transmit_vacancy;    //!< Software copy of the transmit vacancy register
-        pci_bar_handle_t handle; //!< pci bar handle
+        int handle; //!< pci bar handle
         hb_mc_manycore_id_t id;  //!< which manycore instance is this
         uintptr_t      mmio;     //!< pointer to memory mapped io (F1-specific)
 } hb_mc_platform_t;
 
-// ****************************************************************************
-// MMIO INTERFACE
-// ****************************************************************************
-
-/* initialize manycore MMIO */
-static int hb_mc_platform_mmio_init(hb_mc_platform_t *pl,
-                                    hb_mc_manycore_id_t id)
-{
-
-        int pf_id = FPGA_APP_PF, write_combine = 0, bar_id = APP_PF_BAR0;
-        int r = HB_MC_FAIL, err;
-
-        // all IDs except 0 are unused at the moment
-        if (id != 0) {
-                platform_pr_err(pl, "Failed to init MMIO: invalid ID\n");
-                return HB_MC_INVALID;
-        }
-
-        if ((err = fpga_pci_attach(id, pf_id, bar_id, write_combine, &pl->handle)) != 0) {
-                platform_pr_err(pl, "Failed to init MMIO: %s\n", FPGA_ERR2STR(err));
-                platform_pr_err(pl, "Are you running with sudo?\n");
-                return r;
-        }
-
-        // it is not clear to me where 0x4000 comes from...
-        // map in the base address register to our address space
-        if ((err = fpga_pci_get_address(pl->handle, 0, 0x4000, (void**)&pl->mmio)) != 0) {
-                platform_pr_err(pl, "Failed to init MMIO: %s\n", FPGA_ERR2STR(err));
-                goto cleanup;
-        }
-        pl->id = id;
-        r = HB_MC_SUCCESS;
-        platform_pr_dbg(pl, "%s: pl->mmio = 0x%" PRIxPTR "\n", __func__, pl->mmio);
-        goto done;
-
- cleanup:
-        fpga_pci_detach(pl->handle);
-        pl->handle = PCI_BAR_HANDLE_INIT;
- done:
-        return r;
-}
-
-/* cleanup manycore MMIO */
-static void hb_mc_platform_mmio_cleanup(hb_mc_platform_t *pl)
-{
-        int err;
-
-        if (pl->handle == PCI_BAR_HANDLE_INIT)
-                return;
-
-        if ((err = fpga_pci_detach(pl->handle)) != 0)
-                platform_pr_err(pl, "Failed to cleanup MMIO: %s\n", FPGA_ERR2STR(err));
-
-        pl->handle = PCI_BAR_HANDLE_INIT;
-        pl->mmio = (uintptr_t)nullptr;
-        pl->id = 0;
-        return;
-}
-
-/**
- * Write data to manycore hardware at a given AXI Address
- * @param[in]  mmio     An MMIO pointer instance initialized with hb_mc_platform_mmio_init()
- * @param[in]  offset An offset into the manycore's MMIO address space
- * @param[in]  vp     A pointer to a value to be written out
- * @param[in]  sz     Number of bytes in the pointer to be written out
- * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
- */
-static int hb_mc_platform_mmio_read(uintptr_t *mmio, uintptr_t offset,
-                                    void *vp, size_t sz)
-{
-        unsigned char *addr = reinterpret_cast<unsigned char *>(mmio);
-        uint32_t tmp;
-
-        if (addr == nullptr) {
-                platform_pr_err(pl, "%s: Failed: MMIO not initialized", __func__);
-                return HB_MC_UNINITIALIZED;
-        }
-
-        // check that the address is aligned to a four byte boundar
-        if (offset % 4) {
-                platform_pr_err(pl, "%s: Failed: 0x%" PRIxPTR " "
-                                "is not aligned to 4 byte boundary\n",
-                                __func__, offset);
-                return HB_MC_UNALIGNED;
-        }
-
-        addr = &addr[offset];
-
-        tmp = *(volatile uint32_t *)addr;
-
-        switch (sz) {
-        case 4:
-                *(uint32_t*)vp = tmp;
-                break;
-        case 2:
-                *(uint16_t*)vp = tmp;
-                break;
-        case 1:
-                *(uint8_t*)vp  = tmp;
-                break;
-        default:
-                platform_pr_err(pl, "%s: Failed: invalid load size (%zu)\n", __func__, sz);
-                return HB_MC_INVALID;
-        }
-
-        return HB_MC_SUCCESS;
-}
-
-/**
- * Write data to manycore hardware at a given AXI Address
- * @param[in]  mmio     An MMIO pointer instance initialized with hb_mc_platform_mmio_init()
- * @param[in]  offset An offset into the manycore's MMIO address space
- * @param[in]  vp     A pointer to a value to be written out
- * @param[in]  sz     Number of bytes in the pointer to be written out
- * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
- */
-static int hb_mc_platform_mmio_write(uintptr_t *mmio, uintptr_t offset,
-                                     void *vp, size_t sz)
-{
-        unsigned char *addr = reinterpret_cast<unsigned char *>(mmio);
-        uint32_t tmp;
-
-        if (addr == nullptr) {
-                platform_pr_err(pl, "%s: Failed: MMIO not initialized", __func__);
-                return HB_MC_UNINITIALIZED;
-        }
-
-        // check that the address is aligned to a four byte boundary
-        if (offset % 4) {
-                platform_pr_err(pl, "%s: Failed: 0x%" PRIxPTR " "
-                                "is not aligned to 4 byte boundary\n",
-                                __func__, offset);
-                return HB_MC_UNALIGNED;
-        }
-
-        addr = &addr[offset];
-
-        switch (sz) {
-        case 4:
-                tmp = *(uint32_t *)vp;
-                break;
-        case 2:
-                tmp = *(uint16_t*)vp;
-                break;
-        case 1:
-                tmp = *(uint8_t*)vp;
-                break;
-        default:
-                platform_pr_err(pl, "%s: Failed: invalid load size (%zu)\n", __func__, sz);
-                return HB_MC_INVALID;
-        }
-
-        *(volatile uint32_t *)addr = tmp;
-
-        return HB_MC_SUCCESS;
-}
 
 // ****************************************************************************
 // FIFO INTERFACE
@@ -209,7 +49,7 @@ static int hb_mc_platform_rx_fifo_get_occupancy(hb_mc_platform_t *pl,
                 return HB_MC_FAIL;
         }
         else {
-                err = hb_mc_platform_mmio_read32(pl, occupancy_addr, &val);
+                err = hb_mc_mmio_read32(pl->mmio, occupancy_addr, &val);
                 if (err != HB_MC_SUCCESS) {
                         platform_pr_err(pl, "Failed to get %s occupancy\n", typestr);
                         return err;
@@ -306,7 +146,7 @@ static int hb_mc_platform_get_transmit_vacancy(hb_mc_manycore_t *mc,
                 return HB_MC_NOIMPL;
         }
         else {
-                err = hb_mc_platform_mmio_read32(pl, vacancy_addr, &vac);
+                err = hb_mc_mmio_read32(pl->mmio, vacancy_addr, &vac);
                 if (err != HB_MC_SUCCESS) {
                         platform_pr_err(pl, "Failed to get %s vacancy\n", typestr);
                         return err;
@@ -394,7 +234,7 @@ int hb_mc_platform_transmit(hb_mc_manycore_t *mc,
 
         // transmit the data one word at a time
         for (unsigned i = 0; i < array_size(packet->words); i++) {
-                err = hb_mc_platform_mmio_write32(pl, data_addr, packet->words[i]);
+                err = hb_mc_mmio_write32(pl->mmio, data_addr, packet->words[i]);
                 if (err != HB_MC_SUCCESS) {
                         return err;
                 }
@@ -444,7 +284,7 @@ int hb_mc_platform_receive(hb_mc_manycore_t *mc,
 
         /* read in the packet one word at a time */
         for (unsigned i = 0; i < array_size(packet->words); i++) {
-                err = hb_mc_platform_mmio_read32(pl, data_addr, &packet->words[i]);
+                err = hb_mc_mmio_read32(pl->mmio, data_addr, &packet->words[i]);
                 if (err != HB_MC_SUCCESS) {
                         platform_pr_err(pl, "%s: Failed read data from %s FIFO: %s\n",
                                         __func__, typestr, hb_mc_strerror(err));
@@ -476,7 +316,7 @@ int hb_mc_platform_get_config_at(hb_mc_manycore_t *mc,
                 return HB_MC_INVALID;
         }
 
-        err = hb_mc_platform_mmio_read32(pl, addr, config);
+        err = hb_mc_mmio_read32(pl->mmio, addr, config);
         if (err != HB_MC_SUCCESS) {
                 platform_pr_err(pl, "%s: Failed to read config word %d from ROM\n",
                                 __func__, idx);
@@ -509,7 +349,7 @@ static int hb_mc_platform_get_credits(hb_mc_manycore_t *mc,
         }
 
         addr = hb_mc_mmio_out_credits_get_addr();
-        err = hb_mc_platform_mmio_read32(pl, addr, &val);
+        err = hb_mc_mmio_read32(pl->mmio, addr, &val);
         if (err != HB_MC_SUCCESS) {
                 platform_pr_err(pl, "%s: Failed to read endpoint out credits: %s\n",
                                 __func__, hb_mc_strerror(err));
@@ -531,7 +371,7 @@ void hb_mc_platform_cleanup(hb_mc_manycore_t *mc)
 
         hb_mc_platform_fifos_cleanup(mc, pl);
 
-        hb_mc_platform_mmio_cleanup(pl);
+        hb_mc_mmio_cleanup(&pl->mmio, &pl->handle);
 
         pl->name = nullptr;
 
@@ -564,9 +404,10 @@ int hb_mc_platform_init(hb_mc_manycore_t *mc,
         }
 
         pl->name = mc->name;
+        pl->id = id;
 
         // initialize manycore for MMIO
-        if ((err = hb_mc_platform_mmio_init(pl, id)) != HB_MC_SUCCESS){
+        if ((err = hb_mc_mmio_init(&pl->mmio, (int*)&pl->handle, id)) != HB_MC_SUCCESS){
                 delete pl;
                 return err;
         }
@@ -576,7 +417,7 @@ int hb_mc_platform_init(hb_mc_manycore_t *mc,
         // initialize FIFOs
         if ((err = hb_mc_platform_fifos_init(mc, pl)) != HB_MC_SUCCESS){
                 mc->platform = nullptr;
-                hb_mc_platform_mmio_cleanup(pl);
+                hb_mc_mmio_cleanup(&pl->mmio, &pl->handle);
                 delete pl;
                 return err;
         }

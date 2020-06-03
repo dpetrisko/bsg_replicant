@@ -27,7 +27,8 @@
 
 LIB_CSOURCES   += 
 LIB_CXXSOURCES += $(LIBRARIES_PATH)/bsg_manycore.cpp
-LIB_CXXSOURCES += $(BSG_F1_DIR)/platforms/vcs/bsg_manycore_platform.cpp
+LIB_CXXSOURCES += $(BSG_F1_DIR)/platforms/vcs/bsg_manycore_mmio.cpp
+LIB_CXXSOURCES += $(BSG_F1_DIR)/platforms/aws/bsg_manycore_platform.cpp
 LIB_CXXSOURCES += $(LIBRARIES_PATH)/bsg_manycore_bits.cpp
 LIB_CXXSOURCES += $(LIBRARIES_PATH)/bsg_manycore_config.cpp
 LIB_CXXSOURCES += $(LIBRARIES_PATH)/bsg_manycore_cuda.cpp
@@ -76,7 +77,7 @@ LIB_OBJECTS += $(patsubst %cpp,%o,$(LIB_CXXSOURCES))
 LIB_OBJECTS += $(patsubst %c,%o,$(LIB_CSOURCES))
 
 $(LIB_OBJECTS): INCLUDES  = -I$(LIBRARIES_PATH)
-$(LIB_OBJECTS): INCLUDES += -I$(LIBRARIES_PATH)/features/mmio
+$(LIB_OBJECTS): INCLUDES += -I$(BSG_F1_DIR)/platforms/aws
 $(LIB_OBJECTS): INCLUDES += -I$(SDK_DIR)/userspace/include
 $(LIB_OBJECTS): INCLUDES += -I$(HDK_DIR)/common/software/include
 $(LIB_OBJECTS): INCLUDES += -I$(AWS_FPGA_REPO_DIR)/SDAccel/userspace/include
@@ -115,4 +116,6 @@ $(LIBRARIES_PATH)/libbsg_manycore_runtime.so.1.0: $(LIB_OBJECTS) $(HEADERS)
 .PHONY: libraries.clean
 libraries.clean:
 	rm -f $(LIBRARIES_PATH)/*.o
+	rm -f $(BSG_F1_DIR)/platforms/vcs/bsg_manycore_mmio.o
+	rm -f $(BSG_F1_DIR)/platforms/aws/bsg_manycore_platform.o
 	rm -f $(LIBRARIES_PATH)/libbsg_manycore_runtime.so.1.0

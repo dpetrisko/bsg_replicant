@@ -82,98 +82,128 @@ extern "C" {
 
         /**
          * Write data to manycore hardware at a given AXI Address
-         * @param[in]  pl     A manycore instance initialized with hb_mc_manycore_init()
+         * @param[in]  mmio   MMIO pointer initialized with hb_mc_mmio_init()
          * @param[in]  offset An offset into the manycore's MMIO address space
          * @param[in]  vp     A pointer to a value to be written out
          * @param[in]  sz     Number of bytes in the pointer to be written out
          * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
          */
-        static int hb_mc_platform_mmio_write(hb_mc_platform_t *pl, uintptr_t offset,
+        int hb_mc_mmio_write(uintptr_t mmio, uintptr_t offset,
                                              void *vp, size_t sz);
 
         /**
          * Read data from manycore hardware at a given AXI Address
-         * @param[in]  pl     A manycore instance initialized with hb_mc_manycore_init()
+         * @param[in]  mmio   MMIO pointer initialized with hb_mc_mmio_init()
          * @param[in]  offset An offset into the manycore's MMIO address space
          * @param[out] vp     A pointer to read a value in to
          * @param[in]  sz     Number of bytes in the pointer to be written out
          * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
          */
-        static int hb_mc_platform_mmio_read(hb_mc_platform_t *pl, uintptr_t offset,
+        int hb_mc_mmio_read(uintptr_t mmio, uintptr_t offset,
                                             void *vp, size_t sz);
 
         /**
          * Read one byte from manycore hardware at a given AXI Address
-         * @param[in]  pl     A manycore instance initialized with hb_mc_manycore_init()
-         * @param[in]  offset An  offset into the manycore's MMIO address space
+         * @param[in]  mmio   MMIO pointer initialized with hb_mc_mmio_init()
+         * @param[in]  offset An offset into the manycore's MMIO address space
          * @param[out] vp     A byte to be set to the data read
          * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
          */
-        static inline int hb_mc_platform_mmio_read8(hb_mc_platform_t *pl, uintptr_t offset, uint8_t *vp)
+        static inline int hb_mc_mmio_read8(uintptr_t mmio, uintptr_t offset, uint8_t *vp)
         {
-                return hb_mc_platform_mmio_read(pl, offset, (void*)vp, 1);
+                return hb_mc_mmio_read(mmio, offset, (void*)vp, 1);
         }
 
         /**
          * Read a 16-bit half-word from manycore hardware at a given AXI Address
-         * @param[in]  pl     A manycore instance initialized with hb_mc_manycore_init()
-         * @param[in]  offset An  offset into the manycore's MMIO address space
+         * @param[in]  mmio   MMIO pointer initialized with hb_mc_mmio_init()
+         * @param[in]  offset An offset into the manycore's MMIO address space
          * @param[out] vp     A half-word to be set to the data read
          * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
          */
-        static inline int hb_mc_platform_mmio_read16(hb_mc_platform_t *pl, uintptr_t offset, uint16_t *vp)
+        static inline int hb_mc_mmio_read16(uintptr_t mmio, uintptr_t offset, uint16_t *vp)
         {
-                return hb_mc_platform_mmio_read(pl, offset, (void*)vp, 2);
+                return hb_mc_mmio_read(mmio, offset, (void*)vp, 2);
         }
 
         /**
          * Read a 32-bit word from manycore hardware at a given AXI Address
-         * @param[in]  pl     A manycore instance initialized with hb_mc_manycore_init()
-         * @param[in]  offset An  offset into the manycore's MMIO address space
+         * @param[in]  mmio   MMIO pointer initialized with hb_mc_mmio_init()
+         * @param[in]  offset An offset into the manycore's MMIO address space
          * @param[out] vp     A word to be set to the data read
          * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
          */
-        static inline int hb_mc_platform_mmio_read32(hb_mc_platform_t *pl, uintptr_t offset, uint32_t *vp)
+        static inline int hb_mc_mmio_read32(uintptr_t mmio, uintptr_t offset, uint32_t *vp)
         {
-                return hb_mc_platform_mmio_read(pl, offset, (void*)vp, 4);
+                return hb_mc_mmio_read(mmio, offset, (void*)vp, 4);
         }
 
         /**
          * Write one byte to manycore hardware at a given AXI Address
-         * @param[in]  pl     A manycore instance initialized with hb_mc_manycore_init()
-         * @param[in]  offset An  offset into the manycore's MMIO address space
+         * @param[in]  mmio   MMIO pointer initialized with hb_mc_mmio_init()
+         * @param[in]  offset An offset into the manycore's MMIO address space
          * @param[in]  v      A byte value to be written out
          * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
          */
 
-        static inline int hb_mc_platform_mmio_write8(hb_mc_platform_t *pl, uintptr_t offset, uint8_t v)
+        static inline int hb_mc_mmio_write8(uintptr_t mmio, uintptr_t offset, uint8_t v)
         {
-                return hb_mc_platform_mmio_write(pl, offset, (void*)&v, 1);
+                return hb_mc_mmio_write(mmio, offset, (void*)&v, 1);
         }
 
         /**
          * Write a 16-bit half-word to manycore hardware at a given AXI Address
-         * @param[in]  pl     A manycore instance initialized with hb_mc_manycore_init()
-         * @param[in]  offset An  offset into the manycore's MMIO address space
+         * @param[in]  mmio   MMIO pointer initialized with hb_mc_mmio_init()
+         * @param[in]  offset An offset into the manycore's MMIO address space
          * @param[in]  v      A half-word value to be written out
          * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
          */
 
-        static inline int hb_mc_platform_mmio_write16(hb_mc_platform_t *pl, uintptr_t offset, uint16_t v)
+        static inline int hb_mc_mmio_write16(uintptr_t mmio, uintptr_t offset, uint16_t v)
         {
-                return hb_mc_platform_mmio_write(pl, offset, (void*)&v, 2);
+                return hb_mc_mmio_write(mmio, offset, (void*)&v, 2);
         }
 
         /**
          * Write a 32-bit word to manycore hardware at a given AXI Address
-         * @param[in]  pl     A manycore instance initialized with hb_mc_manycore_init()
-         * @param[in]  offset An  offset into the manycore's MMIO address space
+         * @param[in]  mmio   MMIO pointer initialized with hb_mc_mmio_init()
+         * @param[in]  offset An offset into the manycore's MMIO address space
          * @param[in]  v      A word value to be written out
          * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
          */
-        static inline int hb_mc_platform_mmio_write32(hb_mc_platform_t *pl, uintptr_t offset, uint32_t v)
+        static inline int hb_mc_mmio_write32(uintptr_t mmio, uintptr_t offset, uint32_t v)
         {
-                return hb_mc_platform_mmio_write(pl, offset, (void*)&v, 4);
+                return hb_mc_mmio_write(mmio, offset, (void*)&v, 4);
         }
+
+        /**
+         * Initialize MMIO for operation
+         * @param[in]  mmio   MMIO pointer to initialize
+         * @param[in]  handle PCI BAR handle to map
+         * @param[in]  id     ID which selects the physical hardware from which this manycore is configured
+         * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
+         */
+        int hb_mc_mmio_init(uintptr_t *mmio, int* handle, hb_mc_manycore_id_t id);
+
+        /**
+         * Clean up MMIO for termination
+         * @param[in]  mmio   MMIO pointer to clean up
+         * @param[in]  handle PCI BAR handle to unmap
+         * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
+         */
+        int hb_mc_mmio_cleanup(uintptr_t *mmio, int *handle);
+                                      
+/* these are convenience macros that are only good for one line prints */
+#define mmio_pr_dbg(m, fmt, ...)                    \
+        bsg_pr_dbg("%p: " fmt, m, ##__VA_ARGS__)
+
+#define mmio_pr_err(m, fmt, ...)                    \
+        bsg_pr_err("%p: " fmt, m, ##__VA_ARGS__)
+
+#define mmio_pr_warn(m, fmt, ...)                   \
+        bsg_pr_warn("%p: " fmt, m, ##__VA_ARGS__)
+
+#define mmio_pr_info(m, fmt, ...)                   \
+        bsg_pr_info("%p: " fmt, m, ##__VA_ARGS__)
 }
 #endif
