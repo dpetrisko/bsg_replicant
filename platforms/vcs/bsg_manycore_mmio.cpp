@@ -29,7 +29,13 @@
 #include <svdpi.h>
 #include <utils/sh_dpi_tasks.h>
 
-/* initialize manycore MMIO */
+/**
+ * Initialize MMIO for operation
+ * @param[in]  mmio   MMIO pointer to initialize
+ * @param[in]  handle PCI BAR handle to map
+ * @param[in]  id     ID which selects the physical hardware from which this manycore is configured
+ * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
+ */
 int hb_mc_mmio_init(hb_mc_mmio_t *mmio,
                     pci_bar_handle_t* handle,
                     hb_mc_manycore_id_t id)
@@ -59,7 +65,12 @@ int hb_mc_mmio_init(hb_mc_mmio_t *mmio,
         return r;
 }
 
-/* cleanup manycore MMIO */
+/**
+ * Clean up MMIO for termination
+ * @param[in]  mmio   MMIO pointer to clean up
+ * @param[in]  handle PCI BAR handle to unmap
+ * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
+ */
 int hb_mc_mmio_cleanup(hb_mc_mmio_t *mmio,
                        pci_bar_handle_t *handle)
 {
