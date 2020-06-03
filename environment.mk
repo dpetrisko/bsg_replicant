@@ -109,3 +109,7 @@ endif
 # machine.mk defines BSG_MACHINE_PATH, which is the path to the current target
 # machine.
 include $(CL_DIR)/machine.mk
+
+# platform.mk defines BSG_PLATFORM_PATH, which is the host platform to
+# simulate (VCS or Verilator) or run on (AWS)
+include $(CL_DIR)/platform.mk
