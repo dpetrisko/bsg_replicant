@@ -26,7 +26,7 @@ typedef struct hb_mc_platform_t {
         int transmit_vacancy;    //!< Software copy of the transmit vacancy register
         int handle; //!< pci bar handle
         hb_mc_manycore_id_t id;  //!< which manycore instance is this
-        uintptr_t      mmio;     //!< pointer to memory mapped io (F1-specific)
+        hb_mc_mmio_t      mmio;     //!< pointer to memory mapped io (F1-specific)
 } hb_mc_platform_t;
 
 

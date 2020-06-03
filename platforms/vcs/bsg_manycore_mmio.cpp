@@ -30,7 +30,7 @@
 #include <utils/sh_dpi_tasks.h>
 
 /* initialize manycore MMIO */
-int hb_mc_mmio_init(uintptr_t *mmio,
+int hb_mc_mmio_init(hb_mc_mmio_t *mmio,
                     pci_bar_handle_t* handle,
                     hb_mc_manycore_id_t id)
 {
@@ -39,7 +39,7 @@ int hb_mc_mmio_init(uintptr_t *mmio,
 
         // all IDs except 0 are unused at the moment
         if (id != 0) {
-                mmio_pr_err(mmio, "Failed to init MMIO: invalid ID\n");
+                mmio_pr_err((*mmio), "Failed to init MMIO: invalid ID\n");
                 return HB_MC_INVALID;
         }
 
@@ -48,19 +48,19 @@ int hb_mc_mmio_init(uintptr_t *mmio,
         svSetScope(scope);
 
         if ((err = fpga_pci_attach(id, pf_id, bar_id, write_combine, handle)) != 0) {
-                mmio_pr_err(mmio, "Failed to init MMIO: %s\n", FPGA_ERR2STR(err));
+                mmio_pr_err((*mmio), "Failed to init MMIO: %s\n", FPGA_ERR2STR(err));
                 return r;
         }
 
         r = HB_MC_SUCCESS;
-        *mmio = static_cast<uintptr_t>(*handle);
+        (*mmio).handle= *handle;
         mmio_pr_dbg(mmio, "%s: mmio = 0x%" PRIxPTR "\n", __func__, *mmio);
 
         return r;
 }
 
 /* cleanup manycore MMIO */
-int hb_mc_mmio_cleanup(uintptr_t *mmio,
+int hb_mc_mmio_cleanup(hb_mc_mmio_t *mmio,
                        pci_bar_handle_t *handle)
 {
         int err;
@@ -69,10 +69,10 @@ int hb_mc_mmio_cleanup(uintptr_t *mmio,
                 return HB_MC_SUCCESS;
 
         if ((err = fpga_pci_detach(*handle)) != 0)
-                mmio_pr_err(mmio, "Failed to cleanup MMIO: %s\n", FPGA_ERR2STR(err));
+                mmio_pr_err((*mmio), "Failed to cleanup MMIO: %s\n", FPGA_ERR2STR(err));
 
         *handle = PCI_BAR_HANDLE_INIT;
-        *mmio = reinterpret_cast<uintptr_t>(nullptr);
+        (*mmio).handle = PCI_BAR_HANDLE_INIT;
         return HB_MC_SUCCESS;
 }
 
@@ -84,12 +84,12 @@ int hb_mc_mmio_cleanup(uintptr_t *mmio,
  * @param[in]  sz     Number of bytes in the pointer to be written out
  * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
  */
-int hb_mc_mmio_read(uintptr_t mmio, uintptr_t offset,
+int hb_mc_mmio_read(hb_mc_mmio_t mmio, uintptr_t offset,
                     void *vp, size_t sz)
 {
         uint32_t val;
         int err;
-        pci_bar_handle_t handle = static_cast<pci_bar_handle_t>(mmio);
+        pci_bar_handle_t handle = mmio.handle;
 
         if ((err = fpga_pci_peek(handle, offset, &val)) != 0) {
                 mmio_pr_err(mmio, "%s: Failed: %s\n", __func__, FPGA_ERR2STR(err));
@@ -121,12 +121,12 @@ int hb_mc_mmio_read(uintptr_t mmio, uintptr_t offset,
  * @param[in]  sz     Number of bytes in the pointer to be written out
  * @return HB_MC_FAIL if an error occured. HB_MC_SUCCESS otherwise.
  */
-int hb_mc_mmio_write(uintptr_t mmio, uintptr_t offset,
+int hb_mc_mmio_write(hb_mc_mmio_t mmio, uintptr_t offset,
                      void *vp, size_t sz)
 {
         uint32_t val;
         int err;
-        pci_bar_handle_t handle = static_cast<pci_bar_handle_t>(mmio);
+        pci_bar_handle_t handle = mmio.handle;
 
         switch (sz) {
         case 4:
