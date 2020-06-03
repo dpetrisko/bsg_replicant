@@ -31,11 +31,6 @@
 #include <bsg_manycore_platform.h>
 #include <cstdint>
 
-typedef union {
-        uintptr_t p;
-        int handle;
-} hb_mc_mmio_t;
-
 /* PCIe FIFOs */
 #define HB_MC_MMIO_FIFO_DATA_WIDTH 32
 #define HB_MC_MMIO_FIFO_NUM_BYTES 0x10
@@ -78,6 +73,18 @@ typedef union {
 #define hb_mc_mmio_rom_get_addr(ofs)            \
         (HB_MC_MMIO_ROM_BASE + ofs)
 
+
+/* AWS (Physical hardware) and VCS (simulated hardware) differ
+ * slightly, but provide the same interface to the platform. To hide
+ * this fact, we use a union.
+ * 
+ * AWS Uses a memory mapped IO pointer to do native reads/writes.
+ * VCS uses a DPI call that takes a handle (index)
+ */
+typedef union {
+        uintptr_t p;
+        int handle;
+} hb_mc_mmio_t;
 
 #ifdef __cplusplus
 extern "C" {
