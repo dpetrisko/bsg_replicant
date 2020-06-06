@@ -55,10 +55,10 @@ ifdef VCS_HOME
 else ifdef AGFI
 # If VCS is not installed, check for AWS. We define AGFI in the
 # environment of every AGFI we build.
-BSG_PLATFORM := aws
 else
-$(error $(shell echo -e "$(RED)BSG MAKE ERROR: No working platforms available platform for $(NC)"))
+#$(error $(shell echo -e "$(RED)BSG MAKE ERROR: No working platforms available platform for $(NC)"))
 endif
+BSG_PLATFORM := black-parrot
 
 
 
